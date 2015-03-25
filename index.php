@@ -21,6 +21,7 @@ $parseTrad = explode("=>", $firstLine);
 
 //on supprime les caractères indésirables
 $parseTrad = substr($parseTrad[1],2,-3); 
+
 // traduction corrigée
 $correctTrad = $typo->process($parseTrad);
 
