@@ -24,7 +24,17 @@ $parseTrad = substr($parseTrad[1],2,-3);
 // traduction corrigée
 $correctTrad = $typo->process($parseTrad);
 
+// View
+?>
+<html>
+<meta charset="utf-8">
+<body>
+
+<?php
+
 echo "Traduction originale :  ".$parseTrad."<br/>";
 echo "Traduction corrigée : ".$correctTrad;
 
 ?>
+</body>
+</html>
