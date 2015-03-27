@@ -8,6 +8,7 @@ define('INSTALL_ROOT',  $server_config['install'] . '/');
 define('APP_SOURCES',   $server_config['config'] . '/sources/');
 define('WEB_ROOT',      INSTALL_ROOT . 'web/');
 define('APP_ROOT',      INSTALL_ROOT . 'app/');
+define('DATA_ROOT',     INSTALL_ROOT . 'data/');
 define('INC',           APP_ROOT . 'inc/');
 define('VIEWS',         APP_ROOT . 'views/');
 define('MODELS',        APP_ROOT . 'models/');

@@ -1,8 +1,6 @@
 <?php
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use Transvision;
-use Typolib;
 
 // We always work with UTF8 encoding
 mb_internal_encoding('UTF-8');
@@ -32,3 +30,5 @@ $logger->pushHandler(new StreamHandler(INSTALL_ROOT . 'logs/typolib.log', Logger
 if (php_sapi_name() != 'cli') {
 //    require_once INC . 'dispatcher.php';
 }
+
+include(WEB_ROOT . 'index.php');

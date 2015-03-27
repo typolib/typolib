@@ -1,9 +1,8 @@
 <?php
-include('../app/inc/init.php');
 
 $typo = new Debach\PhpTypography\PhpTypography();
 
-$monfichier = fopen('../data/cache_fr.php', 'r');
+$monfichier = fopen(DATA_ROOT . 'cache_fr.php', 'r');
 
 // on passe les 2 première lignes du fichier
 $firstLine = fgets($monfichier); 

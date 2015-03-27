@@ -2,10 +2,10 @@
 
 ; Path to Git checkout of Typolib, it will contain setup/update scripts
 ; and the web folder
-install=
+install=${TYPOLIBDIR}/
 
 ; Path to configuration files for Typolib
-config=
+config=${TYPOLIBDIR}/app/config
 
 ; Flag to know if we are working in production more or development mode
 dev=true
