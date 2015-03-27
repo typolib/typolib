@@ -1,0 +1,7 @@
+app/config/config.ini
+cache/*.cache
+cache/lastdataupdate.txt
+composer.lock
+composer.phar
+logs/*.log
+vendor
