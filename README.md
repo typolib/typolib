@@ -25,8 +25,9 @@ If you can’t run start.sh, follow these steps.
 Edit the file and provide the install and config path information.
 Here is my config for reference:
 
-```install=/home/theo/moz/github/typolib```
-```config=/home/theo/moz/github/typolib/app/config```
+
+install=/home/theo/moz/github/typolib
+config=/home/theo/moz/github/typolib/app/config
 
 
 2. Installing and running Composer to get dependencies:
