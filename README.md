@@ -27,6 +27,8 @@ Here is my config for reference:
 
 
 install=/home/theo/moz/github/typolib
+
+
 config=/home/theo/moz/github/typolib/app/config
 
 

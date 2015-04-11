@@ -28,7 +28,7 @@ $logger->pushHandler(new StreamHandler(INSTALL_ROOT . 'logs/typolib.log', Logger
 
 // Dispatch urls, use it only in web context
 if (php_sapi_name() != 'cli') {
-//    require_once INC . 'dispatcher.php';
+    //    require_once INC . 'dispatcher.php';
 }
 
-include(WEB_ROOT . 'index.php');
+include WEB_ROOT . 'index.php';
