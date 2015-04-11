@@ -1,0 +1,11 @@
+[config]
+
+; Path to Git checkout of Typolib’, it will contain setup/update scripts
+; and the web folder
+install=/home/travis/build/TheoChevalier/typolib/github/
+
+; Path to configuration files for Typolib’
+config=/home/travis/build/TheoChevalier/typolib/app/config
+
+; Flag to know if we are working in production mode or development mode
+dev=true
