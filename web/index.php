@@ -20,6 +20,13 @@ $parseTrad = substr($parseTrad[1], 2, -3);
 // traduction corrigée
 $correctTrad = $typo->process($parseTrad);
 
+function myLog ($text)
+{
+	echo $text;
+}
+
+myLog("Coucou");
+
 // View
 ?>
 <html>
@@ -30,6 +37,8 @@ $correctTrad = $typo->process($parseTrad);
 
 echo "Traduction originale :  " . $parseTrad . "<br/>";
 echo "Traduction corrigée : " . $correctTrad;
+
+
 
 ?>
 </body>
