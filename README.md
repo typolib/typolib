@@ -39,7 +39,14 @@ In a terminal, change directory to the “Typolib” repository you just cloned,
 ```curl -sS https://getcomposer.org/installer | php && php composer.phar install```
 
 
-## Unit tests
+## Update dependencies with composer
+
+```php composer.phar update``` (or ```composer update``` if installed globally)
+
+
+## Before committing
+
+### Run Unit tests
 
 Before committing your work, run Unit tests to check you’re not creating any regression.
 From typolib root folder, run:
@@ -53,6 +60,15 @@ You should see a green line in your terminal stating something like:
 ```Success (1 test, 9/9 methods, 0 void method, 0 skipped method, 55 assertions)!```
 
 
-## Update dependencies with composer
+### Run PHP CS fixer
 
-```php composer.phar update``` (or ```composer update``` if installed globally)
+php-cs-fixer will check the code on all the project and apply our coding guidelines (as specified in .php_cs file).
+Once you’re ready to commit, just run:
+
+```vendor/bin/php-cs-fixer fix```
+
+
+All your code should now follow our guidelines, you can commit and open a Pull-Request. Travis-CI will also run both atoum and php-cs-fixer automatically and warn you if you need to fix something.
+
+
+If the Travis run has failed, fix the issue on your branch, then commit and push again and watch for Travis result.
