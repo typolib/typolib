@@ -7,5 +7,18 @@ install=${TYPOLIBDIR}/
 ; Path to configuration files for Typolib
 config=${TYPOLIBDIR}/app/config
 
+; Typolib’ Github account
+typolib_github_account=TheoChevalier
+
+; Client Github username
+client_github_account=typolib
+
+; Client Github password
+client_github_password=
+
+client_github_email=al2c-typolib@googlegroups.com
+
+client_github_committer=Typolib
+
 ; Flag to know if we are working in production mode or development mode
 dev=true

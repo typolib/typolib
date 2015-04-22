@@ -16,6 +16,13 @@ define('CONTROLLERS',   APP_ROOT . 'controllers/');
 define('CACHE_ENABLED', isset($_GET['nocache']) ? false : true);
 define('CACHE_PATH',    INSTALL_ROOT . 'cache/');
 
+// Github configuration
+define('TYPOLIB_GITHUB_ACCOUNT',  $server_config['typolib_github_account']);
+define('CLIENT_GITHUB_ACCOUNT',   $server_config['client_github_account']);
+define('CLIENT_GITHUB_PASSWORD',  $server_config['client_github_password']);
+define('CLIENT_GITHUB_EMAIL',     $server_config['client_github_email']);
+define('CLIENT_GITHUB_COMMITTER', $server_config['client_github_committer']);
+
 if (file_exists(CACHE_PATH . 'lastdataupdate.txt')) {
     define('CACHE_TIME',  time() - filemtime(CACHE_PATH . 'lastdataupdate.txt'));
 } else {

@@ -19,7 +19,7 @@ then
     fi
 fi
 
-./app/scripts/setup.sh
+#./app/scripts/setup.sh
 
-echo -e $(tput setaf 2; tput bold)"Launching PHP development server (php -S ${SERVER} -t web/ app/inc/init.php)"$(tput sgr0)
-php -S ${SERVER} -t web/ app/inc/init.php
+echo -e $(tput setaf 2; tput bold)"Launching PHP development server (php -S ${SERVER} -t web/ app/inc/router.php)"$(tput sgr0)
+php -S ${SERVER} -t web/ app/inc/router.php
