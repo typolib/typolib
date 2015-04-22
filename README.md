@@ -3,6 +3,15 @@
 Typolib’ is a project created by French students in MIAGE with the help of the [Mozilla Localization Drivers team](https://wiki.mozilla.org/L10n:Mozilla_Team).
 
 
+**Mailing List:** [al2c-typolib@googlegroups.com](mailto:al2c-typolib@googlegroups.com)
+
+
+**Build Status:** [![Build Status](https://api.travis-ci.org/TheoChevalier/typolib.svg)](https://travis-ci.org/TheoChevalier/typolib)
+
+
+**Test Coverage:** [![Coverage Status](https://coveralls.io/repos/TheoChevalier/typolib/badge.svg)](https://coveralls.io/r/TheoChevalier/typolib)
+
+
 ## Dependencies
 
 - PHP >= 5.4
@@ -14,7 +23,7 @@ Typolib’ is a project created by French students in MIAGE with the help of the
 
 To setup automatically the project, just run the ```start.sh``` script.
 
-You can run Typolib’ in your local machine either with the ```start.sh``` script or with ```php -S localhost:8080 -t web/ app/inc/init.php``` and opening http://localhost:8080/ with your browser. To bound PHP internal web server to 0.0.0.0 use ```start.sh -remote```: server will be accessible from other devices in the LAN, or from the host machine in case Typolib’ is running inside a Virtual Machine.
+You can run Typolib’ in your local machine either with the ```start.sh``` script or with ```php -S localhost:8080 -t web/ app/inc/router.php``` and opening http://localhost:8080/ with your browser. To bound PHP internal web server to 0.0.0.0 use ```start.sh -remote```: server will be accessible from other devices in the LAN, or from the host machine in case Typolib’ is running inside a Virtual Machine.
 
 ## Manual setup
 
