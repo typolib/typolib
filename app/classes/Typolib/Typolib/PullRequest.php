@@ -3,6 +3,7 @@ namespace Typolib;
 
 use Bit3\GitPhp\GitException;
 use Bit3\GitPhp\GitRepository;
+use Github\Client;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -196,5 +197,29 @@ class PullRequest
             $this->logger->error('Failed to commit to Git repository. Error: '
                                  . $e->getMessage());
         }
+    }
+
+    /**
+     * Creates a pull request using the current branch commited and pushed
+     * Requires authentication to the client GitHub account.
+     */
+    public function createPullRequest()
+    {
+        $username = urlencode(CLIENT_GITHUB_ACCOUNT);
+        $password = urlencode(CLIENT_GITHUB_PASSWORD);
+
+        $client = new Client();
+
+        //Authentification to the client GitHub account
+        $client->authenticate($username, $password);
+
+        //Creates the pull request
+        $pullRequest = $client->api('pull_request')->create(
+            urlencode(TYPOLIB_GITHUB_ACCOUNT), $this->repo, [
+            'base'  => 'master',
+            'head'  => $this->repo . ':' . $this->branch,
+            'title' => $this->commit_msg,
+            'body'  => '',
+        ]);
     }
 }
