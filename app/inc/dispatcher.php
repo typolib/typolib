@@ -3,20 +3,24 @@ namespace Transvision;
 
 $template     = true;
 $page         = $urls[$url['path']];
-
-$title = '<a href="/" id="typolib-title">Typolib’</a>';
+$extra        = null;
+$show_title   = true;
 
 switch ($url['path']) {
     case '/':
         $controller = 'insert';
-        $show_title = false;
+        $page_title = 'Adding new rules';
+        $page_descr = '';
         break;
     case 'insert':
         $controller = 'insert';
         $page_title = 'Adding new rules';
+        $page_descr = '';
         break;
     default:
         $controller = 'insert';
+        $page_title = 'Adding new rules';
+        $page_descr = '';
         break;
 }
 
@@ -33,7 +37,7 @@ if ($template) {
     ob_end_clean();
 
     // display the page
-    //require_once VIEWS . 'templates/base.php';
+    require_once VIEWS . 'templates/base.php';
 } else {
     if (isset($view)) {
         include VIEWS . $view . '.php';

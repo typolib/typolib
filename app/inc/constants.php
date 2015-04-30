@@ -1,7 +1,9 @@
 <?php
 
+const PRODUCT = 'Typolib’';
+
 // Bump this constant with each new release
-const VERSION = '3.7dev';
+const VERSION = '0.1dev';
 
 // Constants for the project
 define('INSTALL_ROOT',  $server_config['install'] . '/');

@@ -8,14 +8,14 @@
 
     "require": {
         "atoum/atoum" : "~1.1",
-        "debach/php-typography" : "dev-master",
         "monolog/monolog" : "~1.1",
         "mozillal10n/cache": "~0.1",
         "pascalc/tinyl10n" : "~0.1",
         "symfony/var-dumper": "~2.1",
         "fabpot/php-cs-fixer": "~1.4",
         "bit3/git-php": "~1",
-        "knplabs/github-api": "~1.2"
+        "knplabs/github-api": "~1.2",
+        "components/jquery": "~1.11"
     },
 
     "autoload": {
