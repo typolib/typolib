@@ -6,3 +6,4 @@ composer.lock
 composer.phar
 logs/*.log
 vendor
+web/assets/jquery/
