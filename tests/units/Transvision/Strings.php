@@ -209,4 +209,23 @@ class Strings extends atoum\test
             ->float($obj->levenshteinQuality($a, $b))
                 ->isNearlyEqualTo($c);
     }
+
+    // public static function getSentencesFromTextDP()
+    // {
+    //     return [
+    //         ['This is sentence one. Sentence two!', ['This is sentence one.','Sentence two!']],
+    //     ];
+
+    // }
+
+    /**
+     * @dataProvider getSentencesFromTextDP
+     */
+    // public static function testSentencesFromText($a, $b)
+    // {
+    //     $obj = new _Strings();
+    //     $this
+    //         ->array($obj->getSentencesFromText($a))
+    //             ->isEqualTo($b);
+    // }
 }

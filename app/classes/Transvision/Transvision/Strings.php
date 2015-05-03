@@ -12,6 +12,25 @@ namespace Transvision;
  */
 class Strings
 {
+    public static $regexExtractSentences = '/# Split sentences on whitespace between them.
+    (?<=                # Begin positive lookbehind.
+      [.!?]             # Either an end of sentence punct,
+    | [.!?][\'"]        # or end of sentence punct and quote.
+    )                   # End positive lookbehind.
+    (?<!                # Begin negative lookbehind.
+      Mr\.              # Skip either "Mr."
+    | Mrs\.             # or "Mrs.",
+    | Ms\.              # or "Ms.",
+    | Jr\.              # or "Jr.",
+    | Dr\.              # or "Dr.",
+    | Prof\.            # or "Prof.",
+    | Sr\.              # or "Sr.",
+    | T\.V\.A\.         # or "T.V.A.",
+                        # or... (you get the idea).
+    )                   # End negative lookbehind.
+    \s+                 # Split on whitespace between sentences.
+    /ix';
+
     /**
      * Replace contiguous spaces in a string by a single space
      *
@@ -211,5 +230,18 @@ class Strings
         ]);
 
         return (float) (1 - self::levenshteinUTF8($string1, $string2) / $length) * 100;
+    }
+
+    /**
+     * Get a quality index (%) for two strings compared with Levenshtein distance
+     *
+     * @param  string $text Translation text
+     * @return string array  Array of sentences
+     */
+    public static function getSentencesFromText($text)
+    {
+        $sentencesArray = preg_split(self::$regexExtractSentences, $text, -1, PREG_SPLIT_NO_EMPTY);
+
+        return $sentencesArray;
     }
 }
