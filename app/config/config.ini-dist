@@ -22,3 +22,6 @@ client_github_committer=Typolib
 
 ; Flag to know if we are working in production mode or development mode
 dev=true
+
+; If both perf_check AND dev are true, page time generation and memory usage will be displayed in console logs
+perf_check=true
