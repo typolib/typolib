@@ -1,5 +1,4 @@
 <?php
-// path : /home/al2c/Bureau/Typolib/tests/units/Typolib/Code.php
 namespace tests\units\Typolib;
 
 use atoum;
