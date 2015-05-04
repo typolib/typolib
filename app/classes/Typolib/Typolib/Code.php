@@ -17,11 +17,17 @@ class Code
 
     public function __construct($name, $locale)
     {
-        $this->name = $name;
-        $this->locale = $locale;
-        $false_name = Utils::sanitizeFileName($this->name);
-        $this->path = DATA_ROOT . "code/$this->locale/$false_name";
-        $this->createCode();
+        if (Locale::isSupportedLocale($locale)) {
+            $this->name = $name;
+            $this->locale = $locale;
+            $false_name = Utils::sanitizeFileName($this->name);
+            $this->path = DATA_ROOT . "code/$this->locale/$false_name";
+            $this->createCode();
+
+            return true;
+        }
+
+        return false;
     }
 
     public function createCode()
