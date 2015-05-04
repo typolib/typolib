@@ -1,4 +1,5 @@
 <?php
+namespace Typolib;
 
 class Rule
 {
@@ -35,7 +36,7 @@ class Rule
     public static function displayIfThenArrayRule()
     {
         foreach (self::$ifThenRuleArray as $key => $value) {
-            echo "Input caracter : $key => New caracter : $value<br />\n";
+            echo "Input character: $key => New character: $value<br />\n";
         }
     }
 }
