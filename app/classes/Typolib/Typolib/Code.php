@@ -10,29 +10,19 @@ class Code
 {
     // attributes
 
-    public $codeId;
-    public $codeName;
-    public $codeLanguage;
-    public $codeFolder;
-    public $codePath;
-    public static $codeIds = 0;
+    public $name;
+    public $locale;
+    public $folder;
+    public $path;
 
-    public function Code($codeName, $codeLanguage)
+    public function __construct($name, $locale)
     {
-        self::$codeIds = self::$codeIds + 1;
-        $this->codeId = self::$codeIds;
-        $this->codeName = $codeName;
-        $this->codeLanguage = $codeLanguage;
-        $this->codeFolder = 'Code' . $this->codeId . '-' . $this->codeName;
-    }
-
-    public function createCode()
-    {
-        $this->codePath = '../../../../data/' . $this->codeFolder;
-        if (!file_exists($this->codePath)) {
-            mkdir($this->codePath, 0777, true);
-            file_put_contents('rules.php', '');
-            file_put_contents('exceptions.php', '');
+        if (Locale::isSupportedLocale($locale)) {
+            $this->name = $name;
+            $this->locale = $locale;
+            $false_name = Utils::sanitizeFileName($this->name);
+            $this->path = DATA_ROOT . "code/$this->locale/$false_name";
+            $this->createCode();
 
             return true;
         }
@@ -40,21 +30,41 @@ class Code
         return false;
     }
 
-    public function deleteCode()
+    public function createCode()
     {
-        if (is_dir($this->codePath)) {
-            $objects = scandir($this->codePath);
+        if (!file_exists($this->path)) {
+            $var = "<?php \$code = ['name' => '" . $this->name . "', ['1' => ['regle blabla', 'ifthen'], '2' ]] ";
+            mkdir($this->path, 0777, true);
+            file_put_contents($this->path . '/rules.php', $var);
+            file_put_contents($this->path . '/exceptions.php', '');
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static function deleteCode($name, $locale)
+    {
+        $folder = DATA_ROOT . "code/$locale/$name";
+        Code::deleteFolder($folder);
+    }
+
+    private static function deleteFolder($folder)
+    {
+        if (is_dir($folder)) {
+            $objects = scandir($folder);
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
-                    if (filetype($this->codePath . "/" . $object) == "dir") {
-                        deleteCode($this->codePath . "/" . $object);
+                    if (filetype($folder . "/" . $object) == "dir") {
+                        Code::deleteFolder($folder . "/" . $object);
                     } else {
-                        unlink($this->codePath . "/" . $object);
+                        unlink($folder . "/" . $object);
                     }
                 }
             }
             reset($objects);
-            rmdir($this->codePath);
+            rmdir($folder);
 
             return true;
         }
