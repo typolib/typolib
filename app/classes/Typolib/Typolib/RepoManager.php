@@ -10,42 +10,39 @@ use Monolog\Logger;
 use Transvision\Strings;
 
 /**
- * PullRequest class
+ * RepoManager class
  *
- * This class provides methods to clone a Git repository, create a new branch,
- * commit changes, push them to a remote branch on a fork, then create a
- * Pull-Request to the original repo.
+ * This class provides methods to manage a Git repository: fork, clone, setup,
+ * create a new branch, commit changes, push them to a remote branch on the fork, then create a
+ * Pull-Request to the original repo. But it can also check for updates.
  *
  * @package Typolib
  */
-class PullRequest
+class RepoManager
 {
-    public $repo = 'typolib';
+    public $repo;
     public $repo_url;
     public $directory;
     public $config_file;
     public $user_config;
     public $typolib_remote = 'origin';
+    public $client = null;
     public $client_remote = 'github';
     public $client_remote_url;
     public $branch;
     public $branch_prefix = 'typolib-';
     public $commit_msg;
-    public $git;
-    public $logger;
+    private $git;
+    private $logger;
 
     /**
      * Constructor initializes all the arguments then call the method to clone
      * and setup the Git repo.
-     *
-     * @param String $commit_msg The message that will become the commit message
-     *                           and the Pull-Request title.
      */
-    public function __construct($commit_msg)
+    public function __construct()
     {
-        $this->commit_msg = $commit_msg;
         $this->branch = isset($branch) ? $branch : '';
-        $this->repo = isset($repo) ? $repo : $this->repo;
+        $this->repo = isset($repo) ? $repo : RULES_REPO;
 
         $this->repo_url = 'https://github.com/' . urlencode(TYPOLIB_GITHUB_ACCOUNT)
                         . '/' . $this->repo . '.git';
@@ -64,8 +61,8 @@ class PullRequest
                                  . '/' . $this->repo . '.git';
 
         // We use the Monolog library to log our events
-        $this->logger = new Logger('PullRequest');
-        $this->logger->pushHandler(new StreamHandler(INSTALL_ROOT . 'logs/pr-errors.log'));
+        $this->logger = new Logger('RepoManager');
+        $this->logger->pushHandler(new StreamHandler(INSTALL_ROOT . 'logs/repo-errors.log'));
 
         // Also log to error console in Debug mode
         if (DEBUG) {
@@ -82,12 +79,44 @@ class PullRequest
     }
 
     /**
+     *  Forks the repo into client’s Github account if it doesn’t exists
+     */
+    private function fork()
+    {
+        if ($this->client == null) {
+            $this->authenticateClient();
+        }
+
+        // Check if it's already there
+        $repos = $this->client->api('user')->repositories(urlencode(CLIENT_GITHUB_ACCOUNT));
+        $forked = false;
+
+        foreach ($repos as $repo) {
+            if ($repo['name'] == $this->repo && $repo['fork'] == true) {
+                $forked = true;
+                break;
+            }
+        }
+
+        if (! $forked) {
+            // Do the fork
+            $this->client->api('repo')->forks()->create(
+                urlencode(TYPOLIB_GITHUB_ACCOUNT),
+                $this->repo
+            );
+        }
+    }
+
+    /**
      *  Clone and setup a fresh Git repo if the folder is empty.
      */
-    public function cloneAndConfig()
+    private function cloneAndConfig()
     {
         if (! is_dir($this->directory)) {
             try {
+                // First, make sure we have a fork
+                $this->fork();
+
                 $this->git->cloneRepository()->execute($this->repo_url);
                 $this->git->remote()->add(
                                         $this->client_remote,
@@ -108,10 +137,37 @@ class PullRequest
     }
 
     /**
+     * Pulls latest changes from client remote master branch
+     */
+    public function updateMaster()
+    {
+        $this->git->fetch()->execute($this->typolib_remote, 'master');
+        $this->git->checkout()->execute($this->typolib_remote . '/master');
+    }
+
+    /**
+     * Returns the latest commit SHA from master remote branch.
+     */
+    public function getMasterSha()
+    {
+        if ($this->client == null) {
+            $this->authenticateClient();
+        }
+
+        //Get SHA
+        $sha = $this->client->api('repo')->commits()->all(
+            urlencode(TYPOLIB_GITHUB_ACCOUNT),
+            $this->repo,
+            ['sha' => 'master'])[0]['sha'];
+
+        return $sha;
+    }
+
+    /**
      * Creates a new branch name using the prefix and checks if the branch
      * already exists on the remote repo.
      */
-    public function generateBranchName()
+    private function generateBranchName()
     {
         $client_remote = $this->client_remote;
         $branch_prefix = $this->branch_prefix;
@@ -146,15 +202,14 @@ class PullRequest
      * generateBranchName() ensuring the branch doesn't already exists both
      * locally and remotely.
      * Once the branch is created, we push right away to remote to avoid an other
-     * PullRequest instance creates the same branch before we invoke
+     * RepoManager instance creates the same branch before we invoke
      * commitAndPush().
      */
     public function createNewBranch()
     {
         try {
-            // Fetch latest changes to master branch, then switch to master
-            $this->git->fetch()->execute($this->typolib_remote, 'master');
-            $this->git->checkout()->execute($this->typolib_remote . '/master');
+            // Pull latest changes on master branch
+            $this->updateMaster();
 
             // Generate the name after we fetch from remote to get all branches.
             $this->git->fetch()->execute($this->client_remote);
@@ -185,9 +240,13 @@ class PullRequest
      * Commits all the changes made to the local clone on the current branch
      * then push the commit to the $client_remote remote.
      * Requires creating a new branch first using createNewBranch().
+     *
+     * @param String $commit_msg The message that will become the commit message
+     *                           and the Pull-Request title.
      */
-    public function commitAndPush()
+    public function commitAndPush($commit_msg)
     {
+        $this->commit_msg = $commit_msg;
         try {
             // Add files to git index, commit and push to client remote
             $this->git->add()->all()->execute();
@@ -197,13 +256,14 @@ class PullRequest
             $this->logger->error('Failed to commit to Git repository. Error: '
                                  . $e->getMessage());
         }
+
+        $this->createPullRequest();
     }
 
     /**
-     * Creates a pull request using the current branch commited and pushed
-     * Requires authentication to the client GitHub account.
+     * Client Github account authentication, so that we can use the API
      */
-    public function createPullRequest()
+    private function authenticateClient()
     {
         $username = urlencode(CLIENT_GITHUB_ACCOUNT);
         $password = urlencode(CLIENT_GITHUB_PASSWORD);
@@ -213,13 +273,29 @@ class PullRequest
         //Authentification to the client GitHub account
         $client->authenticate($username, $password);
 
+        $this->client = $client;
+    }
+
+    /**
+     * Creates a pull request using the current branch committed and pushed.
+     * Requires authentication to the client GitHub account.
+     */
+    private function createPullRequest()
+    {
+        if ($this->client == null) {
+            $this->authenticateClient();
+        }
+
         //Creates the pull request
-        $pullRequest = $client->api('pull_request')->create(
-            urlencode(TYPOLIB_GITHUB_ACCOUNT), $this->repo, [
-            'base'  => 'master',
-            'head'  => $this->repo . ':' . $this->branch,
-            'title' => $this->commit_msg,
-            'body'  => '',
-        ]);
+        $this->client->api('pull_request')->create(
+            urlencode(TYPOLIB_GITHUB_ACCOUNT),
+            $this->repo,
+            [
+                'base'  => 'master',
+                'head'  => $this->repo . ':' . $this->branch,
+                'title' => $this->commit_msg,
+                'body'  => '',
+            ]
+        );
     }
 }
