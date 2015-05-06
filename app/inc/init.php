@@ -1,4 +1,5 @@
 <?php
+use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -17,14 +18,15 @@ require_once __DIR__ . '/constants.php';
 // Autoloading of classes (both /vendor and /classes)
 require_once INSTALL_ROOT . 'vendor/autoload.php';
 
-// For debugging
-if (DEBUG) {
-    error_reporting(E_ALL);
-}
-
 // Logging
 $logger = new Logger(VERSION);
 $logger->pushHandler(new StreamHandler(INSTALL_ROOT . 'logs/typolib.log', Logger::DEBUG));
+
+// Also log to error console in Debug mode
+if (DEBUG) {
+    $logger->pushHandler(new ErrorLogHandler());
+    error_reporting(E_ALL);
+}
 
 // Dispatch urls, use it only in web context
 if (php_sapi_name() != 'cli') {
