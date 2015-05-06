@@ -242,7 +242,7 @@ class RepoManager
      * Requires creating a new branch first using createNewBranch().
      *
      * @param String $commit_msg The message that will become the commit message
-     * and the Pull-Request title.
+     *                           and the Pull-Request title.
      */
     public function commitAndPush($commit_msg)
     {
@@ -294,7 +294,7 @@ class RepoManager
                 'base'  => 'master',
                 'head'  => $this->repo . ':' . $this->branch,
                 'title' => $this->commit_msg,
-                'body'  => ''
+                'body'  => '',
             ]
         );
     }
