@@ -10,15 +10,15 @@ use Monolog\Logger;
 use Transvision\Strings;
 
 /**
- * PullRequest class
+ * RepoManager class
  *
- * This class provides methods to clone a Git repository, create a new branch,
- * commit changes, push them to a remote branch on a fork, then create a
- * Pull-Request to the original repo.
+ * This class provides methods to manage a Git repository: fork, clone, setup,
+ * create a new branch, commit changes, push them to a remote branch on the fork, then create a
+ * Pull-Request to the original repo. But it can also check for updates.
  *
  * @package Typolib
  */
-class PullRequest
+class RepoManager
 {
     public $repo;
     public $repo_url;
@@ -38,13 +38,9 @@ class PullRequest
     /**
      * Constructor initializes all the arguments then call the method to clone
      * and setup the Git repo.
-     *
-     * @param String $commit_msg The message that will become the commit message
-     *                           and the Pull-Request title.
      */
-    public function __construct($commit_msg)
+    public function __construct()
     {
-        $this->commit_msg = $commit_msg;
         $this->branch = isset($branch) ? $branch : '';
         $this->repo = isset($repo) ? $repo : RULES_REPO;
 
@@ -65,8 +61,8 @@ class PullRequest
                                  . '/' . $this->repo . '.git';
 
         // We use the Monolog library to log our events
-        $this->logger = new Logger('PullRequest');
-        $this->logger->pushHandler(new StreamHandler(INSTALL_ROOT . 'logs/pr-errors.log'));
+        $this->logger = new Logger('RepoManager');
+        $this->logger->pushHandler(new StreamHandler(INSTALL_ROOT . 'logs/repo-errors.log'));
 
         // Also log to error console in Debug mode
         if (DEBUG) {
@@ -206,7 +202,7 @@ class PullRequest
      * generateBranchName() ensuring the branch doesn't already exists both
      * locally and remotely.
      * Once the branch is created, we push right away to remote to avoid an other
-     * PullRequest instance creates the same branch before we invoke
+     * RepoManager instance creates the same branch before we invoke
      * commitAndPush().
      */
     public function createNewBranch()
@@ -244,9 +240,13 @@ class PullRequest
      * Commits all the changes made to the local clone on the current branch
      * then push the commit to the $client_remote remote.
      * Requires creating a new branch first using createNewBranch().
+     *
+     * @param String $commit_msg The message that will become the commit message
+     * and the Pull-Request title.
      */
-    public function commitAndPush()
+    public function commitAndPush($commit_msg)
     {
+        $this->commit_msg = $commit_msg;
         try {
             // Add files to git index, commit and push to client remote
             $this->git->add()->all()->execute();
@@ -277,7 +277,7 @@ class PullRequest
     }
 
     /**
-     * Creates a pull request using the current branch committed and pushed
+     * Creates a pull request using the current branch committed and pushed.
      * Requires authentication to the client GitHub account.
      */
     private function createPullRequest()
@@ -288,11 +288,14 @@ class PullRequest
 
         //Creates the pull request
         $this->client->api('pull_request')->create(
-            urlencode(TYPOLIB_GITHUB_ACCOUNT), $this->repo, [
-            'base'  => 'master',
-            'head'  => $this->repo . ':' . $this->branch,
-            'title' => $this->commit_msg,
-            'body'  => '',
-        ]);
+            urlencode(TYPOLIB_GITHUB_ACCOUNT),
+            $this->repo,
+            [
+                'base'  => 'master',
+                'head'  => $this->repo . ':' . $this->branch,
+                'title' => $this->commit_msg,
+                'body'  => ''
+            ]
+        );
     }
 }

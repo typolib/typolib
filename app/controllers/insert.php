@@ -1,7 +1,7 @@
 <?php
 
 use Typolib\Code;
-use Typolib\PullRequest;
+use Typolib\RepoManager;
 use Typolib\Rule;
 
 $code = new Code('firefox', 'fr');
@@ -12,7 +12,7 @@ Rule::manageRule('firefox', 'fr', 0, 'update_content', 'test switch');
 
 //$ru = new Rule('typolib', 'fr', 'regle machin', 'ifthen');
 
-$pr = new PullRequest("Great feature");
+$pr = new RepoManager("Great feature");
 //$pr->createNewBranch();
 
 $pr->getMasterSha();
