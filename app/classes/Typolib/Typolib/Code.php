@@ -32,9 +32,9 @@ class Code
     public function createCode()
     {
         if (! file_exists($this->path)) {
-            $var = "<?php \$code = ['name' => '" . $this->name . "', ['1' => ['regle blabla', 'ifthen'], '2' ]] ";
+            $code = ['name' => $this->name];
             mkdir($this->path, 0777, true);
-            file_put_contents($this->path . '/rules.php', $var);
+            file_put_contents($this->path . '/rules.php', serialize($code));
             file_put_contents($this->path . '/exceptions.php', '');
 
             return true;
@@ -48,5 +48,12 @@ class Code
         $folder = DATA_ROOT . "code/$locale/$name";
 
         return Utils::deleteFolder($folder);
+    }
+
+    public static function existCode($name, $locale)
+    {
+        $folder = DATA_ROOT . "code/$locale/$name";
+
+        return file_exists($folder);
     }
 }
