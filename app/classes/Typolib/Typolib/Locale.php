@@ -12,10 +12,6 @@ class Locale
 
     public static function isSupportedLocale($locale)
     {
-        if (in_array($locale, self::$locale_list)) {
-            return true;
-        } else {
-            return false;
-        }
+        return in_array($locale, self::$locale_list);
     }
 }

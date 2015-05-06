@@ -20,6 +20,7 @@ define('CACHE_PATH',    INSTALL_ROOT . 'cache/');
 
 // Github configuration
 define('TYPOLIB_GITHUB_ACCOUNT',  $server_config['typolib_github_account']);
+define('RULES_REPO',              'typolib-rules');
 define('CLIENT_GITHUB_ACCOUNT',   $server_config['client_github_account']);
 define('CLIENT_GITHUB_PASSWORD',  $server_config['client_github_password']);
 define('CLIENT_GITHUB_EMAIL',     $server_config['client_github_email']);
