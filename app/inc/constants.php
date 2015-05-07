@@ -26,13 +26,6 @@ define('CLIENT_GITHUB_PASSWORD',  $server_config['client_github_password']);
 define('CLIENT_GITHUB_EMAIL',     $server_config['client_github_email']);
 define('CLIENT_GITHUB_COMMITTER', $server_config['client_github_committer']);
 
-if (file_exists(CACHE_PATH . 'lastdataupdate.txt')) {
-    define('CACHE_TIME',  time() - filemtime(CACHE_PATH . 'lastdataupdate.txt'));
-} else {
-    // 05h20 cache (because we extract data every 6h and extraction lasts 25mn)
-    define('CACHE_TIME',  19200);
-}
-
 // Special modes for the app
 define('DEBUG', (strstr(VERSION, 'dev') || isset($_GET['debug'])) ? true : false);
 
