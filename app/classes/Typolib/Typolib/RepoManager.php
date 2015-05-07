@@ -20,45 +20,61 @@ use Transvision\Strings;
  */
 class RepoManager
 {
-    public $repo;
-    public $repo_url;
-    public $directory;
-    public $config_file;
-    public $user_config;
-    public $typolib_remote = 'origin';
-    public $client = null;
-    public $client_remote = 'github';
-    public $client_remote_url;
-    public $branch;
-    public $branch_prefix = 'typolib-';
-    public $commit_msg;
+    private $repo;
+    private $repo_url;
+    private $path;
+    private $update_file;
+    private $config_file;
+    private $user_config;
+    private $our_remote = 'origin';
+    private $client = null;
+    private $client_remote = 'github';
+    private $remote_url;
+    private $branch;
+    private $branch_prefix = 'typolib-';
+    private $commit_msg;
     private $git;
     private $logger;
 
     /**
-     * Constructor initializes all the arguments then call the method to clone
+     * Constructor that initialize all the arguments then call the method to clone
      * and setup the Git repo.
+     *
+     * @param array $args Array containing one or more class attributes, like for instance:
+     *                    ['repo' => 'typolib', 'path' => '~/typolib/data/typolib/']
      */
-    public function __construct()
+    public function __construct(array $args = null)
     {
-        $this->branch = isset($branch) ? $branch : '';
-        $this->repo = isset($repo) ? $repo : RULES_REPO;
+        $this->repo  = isset($args['repo']) ? $args['repo'] : RULES_REPO;
 
-        $this->repo_url = 'https://github.com/' . urlencode(TYPOLIB_GITHUB_ACCOUNT)
-                        . '/' . $this->repo . '.git';
+        $github_url  = 'https://github.com/' . urlencode(TYPOLIB_GITHUB_ACCOUNT)
+                     . '/' . $this->repo . '.git';
+        $remote_url  = 'https://' . urlencode(CLIENT_GITHUB_ACCOUNT)
+                     . ':' . urlencode(CLIENT_GITHUB_PASSWORD)
+                     . '@github.com/' . urlencode(CLIENT_GITHUB_ACCOUNT)
+                     . '/' . $this->repo . '.git';
+        $path        = DATA_ROOT . $this->repo . '/';
+        $update_file = DATA_ROOT . 'lastupdate.txt';
 
-        $this->directory = DATA_ROOT . $this->repo . '/';
-        $this->config_file = $this->directory . '.git/config';
+        $this->branch      = isset($args['branch'])      ? $args['branch']      : '';
+        $this->repo_url    = isset($args['repo_url'])    ? $args['repo_url']    : $github_url;
+        $this->remote_url  = isset($args['remote_url'])  ? $args['remote_url']  : $remote_url;
+        $this->path        = isset($args['path'])        ? $args['path']        : $path;
+        $this->update_file = isset($args['update_file']) ? $args['update_file'] : $update_file;
 
-        #FIXME: edit the config with GitPhp, allow custom email/name per Pull Request
+        $this->config_file = $this->path . '.git/config';
+
+        // FIXME: edit the config with GitPhp, allow custom email/name per Pull Request
+        if (isset($args['email']) && isset($args['committer'])) {
+            $email      = $args['email'];
+            $committer  = $args['committer'];
+        } else {
+            $email      = CLIENT_GITHUB_EMAIL;
+            $committer  = CLIENT_GITHUB_COMMITTER;
+        }
         $this->user_config = "[user]\n"
-                           . '    email = ' . CLIENT_GITHUB_EMAIL . "\n"
-                           . '    name = ' . CLIENT_GITHUB_COMMITTER . "\n";
-
-        $this->client_remote_url = 'https://' . urlencode(CLIENT_GITHUB_ACCOUNT)
-                                 . ':' . urlencode(CLIENT_GITHUB_PASSWORD)
-                                 . '@github.com/' . urlencode(CLIENT_GITHUB_ACCOUNT)
-                                 . '/' . $this->repo . '.git';
+                           . '    email = ' . $email . "\n"
+                           . '    name = ' . $committer . "\n";
 
         // We use the Monolog library to log our events
         $this->logger = new Logger('RepoManager');
@@ -70,7 +86,7 @@ class RepoManager
         }
 
         try {
-            $this->git = new GitRepository($this->directory);
+            $this->git = new GitRepository($this->path);
         } catch (GitException $e) {
             $this->logger->error('Failed to initialize Git repository. Error: '
                                  . $e->getMessage());
@@ -112,7 +128,7 @@ class RepoManager
      */
     private function cloneAndConfig()
     {
-        if (! is_dir($this->directory)) {
+        if (! is_dir($this->path)) {
             try {
                 // First, make sure we have a fork
                 $this->fork();
@@ -120,7 +136,7 @@ class RepoManager
                 $this->git->cloneRepository()->execute($this->repo_url);
                 $this->git->remote()->add(
                                         $this->client_remote,
-                                        $this->client_remote_url
+                                        $this->remote_url
                                     )->execute();
 
                 $this->git->fetch()->execute($this->client_remote);
@@ -138,17 +154,31 @@ class RepoManager
 
     /**
      * Pulls latest changes from client remote master branch
+     *
+     * @return String $sha SHA of the latest commit on master branch that we've
+     *                just updated.
      */
     public function updateMaster()
     {
-        $this->git->fetch()->execute($this->typolib_remote, 'master');
-        $this->git->checkout()->execute($this->typolib_remote . '/master');
+        $this->git->fetch()->execute($this->our_remote, 'master');
+        $this->git->checkout()->execute($this->our_remote . '/master');
+        $sha = $this->getMasterSha();
+        if (! file_put_contents($sha, $this->update_file)) {
+            $this->logger->error('Can\'t write ' . $this->update_file . ' file');
+
+            return false;
+        }
+
+        return $sha;
     }
 
     /**
-     * Returns the latest commit SHA from master remote branch.
+     * Get the latest commit SHA from master remote branch.
+     *
+     * @return String $sha SHA of latest available commit, or false if we've not
+     *                been able to retrieve it.
      */
-    public function getMasterSha()
+    private function getMasterSha()
     {
         if ($this->client == null) {
             $this->authenticateClient();
@@ -156,11 +186,31 @@ class RepoManager
 
         //Get SHA
         $sha = $this->client->api('repo')->commits()->all(
-            urlencode(TYPOLIB_GITHUB_ACCOUNT),
-            $this->repo,
-            ['sha' => 'master'])[0]['sha'];
+                    urlencode(TYPOLIB_GITHUB_ACCOUNT),
+                    $this->repo,
+                    ['sha' => 'master']
+                )[0]['sha'];
 
-        return $sha;
+        return $sha || false;
+    }
+
+    /**
+     * Check if our local clone is up-to-date
+     *
+     * @return boolean Returns true if our clone is up-to-date, false otherwise.
+     */
+    public function checkForUpdates()
+    {
+        $local_sha = file_get_contents($this->update_file);
+        $remote_sha = $this->getMasterSha();
+
+        if ($local_sha != $remote_sha) {
+            $this->updateMaster();
+
+            return true;
+        }
+
+        return false;
     }
 
     /**

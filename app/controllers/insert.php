@@ -12,10 +12,10 @@ Rule::manageRule('firefox', 'fr', 0, 'update_content', 'test switch');
 
 //$ru = new Rule('typolib', 'fr', 'regle machin', 'ifthen');
 
-$pr = new RepoManager("Great feature");
+$pr = new RepoManager();
 //$pr->createNewBranch();
 
-$pr->getMasterSha();
+$pr->updateMaster();
 /*
 $file_name = DATA_ROOT . 'typolib-rules/test.php';
 // Update content in repository
