@@ -1,13 +1,16 @@
 <?php
 
 use Typolib\Code;
+use Typolib\Exception;
 use Typolib\RepoManager;
 use Typolib\Rule;
 
 $code = new Code('firefox', 'fr');
 
 $ru = new Rule('firefox', 'fr', 'regle test', 'ifthen');
+$ru1 = new Rule('firefox', 'fr', 'regle numéro 2', 'ifthen');
 Rule::manageRule('firefox', 'fr', 0, 'update_content', 'test switch');
+$ex = new Exception('firefox', 'fr', 0, 'contenu de l\'exception');
 //$code = new Code('typolib', 'fr');
 
 //$ru = new Rule('typolib', 'fr', 'regle machin', 'ifthen');
