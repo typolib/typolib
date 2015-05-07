@@ -4,16 +4,29 @@ namespace Typolib;
 /**
  * Rule class
  *
+ * This class provides methods to manage a rule: create, delete or update,
+ * check if a rule exists and get all the rules for a specific code.
+ *
  * @package Typolib
  */
 class Rule
 {
-    public $id;
-    public $content;
-    public $type;
-    public static $ifThenRuleArray = [];
-    public static $all_ids = [];
+    private $id;
+    private $content;
+    private $type;
+    private static $ifThenRuleArray = [];
+    private static $all_ids = [];
 
+    /**
+     * Constructor that initializes all the arguments then call the method to
+     * create the rule if the code exists.
+     *
+     * @param  String  $name_code   The code name from which the rule depends.
+     * @param  String  $locale_code The locale code from which the rule depends.
+     * @param  String  $content     The content of the new rule.
+     * @param  String  $type        The type of the new rule.
+     * @return boolean True if the rule has been created.
+     */
     public function __construct($name_code, $locale_code, $content, $type)
     {
         if (Code::existCode($name_code, $locale_code)) {
@@ -27,9 +40,15 @@ class Rule
         return false;
     }
 
+    /**
+     * Creates a rule into the rules.php file located inside the code directory.
+     *
+     * @param String $name_code   The code name from which the rule depends.
+     * @param String $locale_code The locale code from which the rule depends.
+     */
     public function createRule($name_code, $locale_code)
     {
-        $folder = DATA_ROOT . "code/$locale_code/$name_code/rules.php";
+        $folder = DATA_ROOT . RULES_REPO . "/$locale_code/$name_code/rules.php";
         $code = Rule::getArrayRules($name_code, $locale_code);
         $code['rules'][] = ['content' => $this->content, 'type' => $this->type];
 
@@ -40,9 +59,21 @@ class Rule
         file_put_contents($folder, serialize($code));
     }
 
+    /**
+     * Allows deleting a rule, or updating the content or the type of a rule.
+     *
+     * @param  String  $name_code   The code name from which the rule depends.
+     * @param  String  $locale_code The locale code from which the rule depends.
+     * @param  integer $id          The identity of the rule.
+     * @param  String  $action      The action to perform: 'delete', 'update_content'
+     *                              or 'update_type'.
+     * @param  String  $value       The new content or type of the rule. If action
+     *                              is 'delete' the value must be empty.
+     * @return boolean True if the function succeeds.
+     */
     public static function manageRule($name_code, $locale_code, $id, $action, $value = '')
     {
-        $folder = DATA_ROOT . "code/$locale_code/$name_code/rules.php";
+        $folder = DATA_ROOT . RULES_REPO . "/$locale_code/$name_code/rules.php";
 
         $code = Rule::getArrayRules($name_code, $locale_code);
         if ($code != null && Rule::existRule($code, $id)) {
@@ -67,15 +98,28 @@ class Rule
         return false;
     }
 
+    /**
+     * Check if the rule exists in a rules array.
+     *
+     * @param  array   $code The array in which the rule must be searched.
+     * @param  integer $id   The identity of the rule we search.
+     * @return boolean True if the rule exists
+     */
     public static function existRule($code, $id)
     {
         return array_key_exists($id, $code['rules']);
     }
 
+    /**
+     * Get an array of all the rules for a specific code.
+     *
+     * @param String $name_code   The code name from which the rules depend.
+     * @param String $locale_code The locale code from which the rules depend.
+     */
     public static function getArrayRules($name_code, $locale_code)
     {
         if (Code::existCode($name_code, $locale_code)) {
-            $folder = DATA_ROOT . "code/$locale_code/$name_code/rules.php";
+            $folder = DATA_ROOT . RULES_REPO . "/$locale_code/$name_code/rules.php";
 
             return unserialize(file_get_contents($folder));
         }
@@ -105,6 +149,9 @@ class Rule
         }
     }
 
+    /**
+     * Unused for now
+     */
     public static function generateRuleId()
     {
         $array = Rule::scanDirectory(DATA_ROOT . 'code');
@@ -117,6 +164,12 @@ class Rule
         return ++$id;
     }
 
+    /**
+     * Scan the directory and put all the rules id in an array
+     *
+     * @param  String $dir The directory to be scanned.
+     * @return array  $all_ids The array which contains all the rules id.
+     */
     public static function scanDirectory($dir)
     {
         if (is_dir($dir)) {
